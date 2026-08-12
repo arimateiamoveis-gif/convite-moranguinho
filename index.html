@@ -340,10 +340,6 @@
     </div>
 </div>
 
-<!-- MÚSICA INVISÍVEL (YOUTUBE) -->
-<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
-    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
 
 <script>
     // Inicialização do Firebase (já existente)
@@ -395,3 +391,32 @@
 </script>
 </body>
 </html>
+
+<!-- MÚSICA INVISÍVEL (YOUTUBE) - TOCA NO PRIMEIRO CLIQUE -->
+<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
+    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
+<script>
+    (function() {
+        var iframe = document.getElementById("youtubePlayer");
+        var tocando = false;
+        function tocar() {
+            if (!tocando) {
+                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
+                tocando = true;
+                console.log("🎵 Música ativada!");
+            }
+        }
+        // Tenta tocar ao carregar (pode ser bloqueado)
+        window.addEventListener("load", function() {
+            setTimeout(tocar, 100);
+        });
+        // No primeiro clique/toque em qualquer lugar, toca (se ainda não tiver)
+        document.addEventListener("click", function() {
+            if (!tocando) tocar();
+        });
+        document.addEventListener("touchstart", function() {
+            if (!tocando) tocar();
+        });
+    })();
+</script>
