@@ -488,39 +488,3 @@
 </body>
 </html>
 
-    <!-- MÚSICA DA MORANGUINHO - AUTOPLAY -->
-    <div style="position:fixed; bottom:80px; right:15px; z-index:999; background:rgba(255,255,255,0.85); border-radius:50px; padding:8px 12px; box-shadow:0 4px 15px rgba(0,0,0,0.15); border:2px solid #ffb3c6; display:flex; align-items:center; gap:6px;">
-        <audio id="musicaMorango" autoplay loop style="display:none;">
-            <source src="moranguinho.mp3" type="audio/mpeg">
-        </audio>
-        <button onclick="playMusic()" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">🔊</button>
-        <span style="font-size:0.65rem; color:#b26a7a; font-weight:600;">Música</span>
-    </div>
-
-    <script>
-        // Força o áudio a tocar automaticamente
-        window.addEventListener('load', function() {
-            var audio = document.getElementById('musicaMorango');
-            audio.volume = 0.6;
-            audio.play().catch(function(e) {
-                console.log('Autoplay bloqueado. Clique no botão para ativar.');
-            });
-        });
-
-        function playMusic() {
-            var audio = document.getElementById('musicaMorango');
-            if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
-            }
-        }
-
-        // Toca ao clicar em qualquer lugar da página (para navegadores que bloqueiam autoplay)
-        document.addEventListener('click', function() {
-            var audio = document.getElementById('musicaMorango');
-            if (audio.paused) {
-                audio.play();
-            }
-        }, { once: true });
-    </script>
