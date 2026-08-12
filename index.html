@@ -54,23 +54,14 @@
             font-size: 1.1rem;
             color: #d45a7a;
         }
-    <!-- PLAYER DE MÚSICA -->
-    <div style="text-align:center; margin: 10px 0;">
-        <iframe width="100%" height="80" src="https://www.youtube.com/embed/VIDEO_ID" title="Música da Moranguinho" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-        <div style="font-size:0.8rem; color:#b26a7a;">🎵 Clique no play para ouvir a música da Moranguinho</div>
-    </div>
         .foto-container {
             border-radius: 40px;
             overflow: hidden;
             margin: 15px 0 20px;
             border: 4px solid #ffb3c6;
             box-shadow: 0 8px 0 #d4707a;
+            background: #fff0f5;
         }
-    <!-- PLAYER DE MÚSICA -->
-    <div style="text-align:center; margin: 10px 0;">
-        <iframe width="100%" height="80" src="https://www.youtube.com/embed/VIDEO_ID" title="Música da Moranguinho" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-        <div style="font-size:0.8rem; color:#b26a7a;">🎵 Clique no play para ouvir a música da Moranguinho</div>
-    </div>
         .foto-container img {
             width: 100%;
             height: auto;
@@ -103,6 +94,11 @@
             font-weight: 700;
             color: #8f334b;
             margin-top: 12px;
+        }
+        .info-festa a {
+            color: #b3405a;
+            text-decoration: underline;
+            font-weight: bold;
         }
         .botoes {
             display: flex;
@@ -144,7 +140,7 @@
             font-size: 0.9rem;
         }
 
-        /* BOTÃO MORANGO ADMIN - discreto no rodapé */
+        /* BOTÃO MORANGO ADMIN */
         .admin-strawberry {
             position: relative;
             display: inline-block;
@@ -295,6 +291,11 @@
             text-align: center;
             margin: 8px 0;
         }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.8rem; }
+            .convite-texto .destaque { font-size: 1.6rem; }
+            .btn { font-size: 1.1rem; padding: 14px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -304,11 +305,6 @@
         <h1>🍓 1 aninho 🍓<small>da nossa princesinha</small></h1>
     </div>
 
-    <!-- PLAYER DE MÚSICA -->
-    <div style="text-align:center; margin: 10px 0;">
-        <iframe width="100%" height="80" src="https://www.youtube.com/embed/VIDEO_ID" title="Música da Moranguinho" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-        <div style="font-size:0.8rem; color:#b26a7a;">🎵 Clique no play para ouvir a música da Moranguinho</div>
-    </div>
     <div class="foto-container">
         <img src="foto.jpg" alt="Foto da aniversariante" />
     </div>
@@ -322,7 +318,10 @@
             Estou crescendo e vou fazer <strong>1 ano</strong>!<br>
             Quero muito você na minha festa 🎈
         </div>
-        <div class="info-festa">📅 19 de Setembro · 14h &nbsp;|&nbsp; <a href="https://maps.app.goo.gl/qfi1f1E9WsPWSTPq6" target="_blank" style="color:#b3405a; text-decoration:underline; font-weight:bold;"><a href="https://maps.app.goo.gl/qfi1f1E9WsPWSTPq6" target="_blank" style="color:#b3405a; text-decoration:underline; font-weight:bold;">📍 Top Kid Riacho Fundo 2</a></a></div>
+        <div class="info-festa">
+            📅 19 de Setembro · 14h &nbsp;|&nbsp;
+            <a href="https://maps.app.goo.gl/qfi1f1E9WsPWSTPq6" target="_blank">📍 Top Kid Riacho Fundo 2</a>
+        </div>
     </div>
 
     <div class="botoes">
@@ -393,7 +392,6 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    // Abrir modal
     btnAdmin.addEventListener('click', () => {
         modalAdmin.classList.add('aberto');
         senhaInput.value = '';
@@ -402,7 +400,6 @@
         msgErro.textContent = '';
     });
 
-    // Fechar modal
     fecharModal.addEventListener('click', () => {
         modalAdmin.classList.remove('aberto');
     });
@@ -487,4 +484,3 @@
 </script>
 </body>
 </html>
-
