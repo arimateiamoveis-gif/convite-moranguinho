@@ -487,5 +487,29 @@
         }
     }, 10000);
 </script>
+    <!-- ÁUDIO INVISÍVEL -->
+    <audio id="musicaMorango" loop style="display:none;">
+        <source src="moranguinho.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+        (function() {
+            var audio = document.getElementById("musicaMorango");
+            audio.volume = 0.5;
+            function tocar() {
+                audio.play().then(function() {
+                    console.log("🎵 Música tocando");
+                }).catch(function(e) {
+                    console.log("⏳ Aguardando interação...");
+                });
+            }
+            window.addEventListener("load", tocar);
+            document.addEventListener("click", function() {
+                if (audio.paused) tocar();
+            }, { once: true });
+            document.addEventListener("touchstart", function() {
+                if (audio.paused) tocar();
+            }, { once: true });
+        })();
+    </script>
 </body>
 </html>
