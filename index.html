@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -36,6 +41,7 @@
             text-align: center;
             opacity: 0.15;
             letter-spacing: 30px;
+            pointer-events: none;
         }
         .header h1 {
             font-size: 2.2rem;
@@ -103,82 +109,195 @@
             cursor: pointer;
             box-shadow: 0 8px 0 rgba(0,0,0,0.12);
             flex: 1;
+            transition: all 0.2s;
         }
         .btn-sim { background: #f57c9a; color: white; }
+        .btn-sim:hover { background: #e86283; transform: scale(1.02); }
         .btn-nao { background: #d3d3d3; color: #4a4a4a; }
+        .btn-nao:hover { background: #bfbfbf; }
+        .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
         .mensagem-retorno {
             font-size: 1.2rem;
             background: #d4edda;
             border-radius: 60px;
             padding: 14px;
             display: none;
+            margin-top: 15px;
+            border: 2px solid #a3d8b5;
         }
-        .mensagem-retorno.visivel { display: block; }
-        .admin-panel {
-            margin-top: 30px;
-            background: #ffeef2;
-            border-radius: 30px;
-            padding: 20px;
+        .mensagem-retorno.visivel { display: block; animation: fade 0.5s; }
+        @keyframes fade { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+        .rodape {
+            text-align: center;
+            margin-top: 20px;
+            color: #b26a7a;
+            font-size: 0.9rem;
+        }
+
+        /* BOTÃO MORANGO ADMIN - discreto no rodapé */
+        .admin-strawberry {
+            position: relative;
+            display: inline-block;
+            margin-top: 12px;
+            cursor: pointer;
+            font-size: 2rem;
+            transition: transform 0.3s;
+            background: none;
+            border: none;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+        .admin-strawberry:hover {
+            transform: scale(1.15) rotate(-8deg);
+        }
+        .admin-strawberry:active {
+            transform: scale(0.9);
+        }
+        .admin-tooltip {
+            font-size: 0.65rem;
+            color: #c47a8a;
+            display: block;
+            margin-top: 2px;
+        }
+
+        /* MODAL ADMIN */
+        .modal-overlay {
             display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
         }
-        .admin-panel.visivel { display: block; }
-        .senha-input {
+        .modal-overlay.aberto {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .modal {
+            background: white;
+            border-radius: 60px 60px 40px 40px;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 30px 25px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+            border: 4px solid #ff85a2;
+            position: relative;
+        }
+        .modal h2 {
+            color: #b3405a;
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .modal .fechar {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            color: #b3405a;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: transform 0.2s;
+        }
+        .modal .fechar:hover { transform: rotate(90deg); }
+        .modal .senha-input {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            margin: 15px 0;
         }
-        .senha-input input {
+        .modal .senha-input input {
             flex: 1;
             padding: 12px 16px;
             border-radius: 60px;
             border: 2px solid #f5b1b1;
+            font-size: 1rem;
             min-width: 130px;
+            outline: none;
         }
-        .senha-input button {
+        .modal .senha-input button {
             background: #b3405a;
             color: white;
             border: none;
             border-radius: 60px;
             padding: 12px 24px;
             font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .admin-panel ul {
+        .modal .senha-input button:hover { background: #a1344e; }
+        .modal .stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 8px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .modal .stats span {
+            background: #f5f5f5;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+        .modal .stats .total { background: #f57c9a; color: white; }
+        .modal .stats .sim { background: #4caf50; color: white; }
+        .modal .stats .nao { background: #f44336; color: white; }
+        .modal ul {
             list-style: none;
             padding: 0;
-            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
         }
-        .admin-panel li {
-            background: white;
+        .modal ul li {
+            background: #fafafa;
             border-radius: 40px;
-            padding: 10px 18px;
-            margin: 8px 0;
+            padding: 10px 16px;
+            margin: 6px 0;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             border-left: 6px solid #f57c9a;
+            font-size: 0.95rem;
         }
-        .admin-panel .badge {
+        .modal ul li .badge {
             background: #f57c9a;
             color: white;
             border-radius: 40px;
-            padding: 4px 16px;
+            padding: 2px 14px;
+            font-size: 0.75rem;
             font-weight: 700;
         }
-        .rodape {
+        .modal ul li small {
+            color: #999;
+            font-size: 0.65rem;
+        }
+        .mensagem-erro {
+            color: #d32f2f;
+            font-size: 0.9rem;
             text-align: center;
-            margin-top: 20px;
-            color: #b26a7a;
+            margin: 8px 0;
         }
     </style>
 </head>
 <body>
 <div class="container">
+
     <div class="header">
         <h1>🍓 1 aninho 🍓<small>da nossa princesinha</small></h1>
     </div>
+
     <div class="foto-container">
         <img src="foto.jpg" alt="Foto da aniversariante" />
     </div>
+
     <div class="convite-texto">
         <span class="destaque">
             VENHA COMEMORAR COMIGO!
@@ -190,52 +309,166 @@
         </div>
         <div class="info-festa">📅 08 de Agosto · 14h &nbsp;|&nbsp; 📍 Casa da vovó</div>
     </div>
+
     <div class="botoes">
         <button class="btn btn-sim" id="btnSim">🍓 VOU SIM!</button>
         <button class="btn btn-nao" id="btnNao">😔 Não vou</button>
     </div>
+
     <div class="mensagem-retorno" id="mensagemRetorno"></div>
-    <div class="rodape">💖 Traga um sorriso, leve um moranguinho</div>
-    <div class="admin-panel" id="adminPanel">
-        <h3 style="color:#a13b55;">🍓 Painel da Mamãe</h3>
+
+    <div class="rodape">
+        💖 Traga um sorriso, leve um moranguinho
+        <button class="admin-strawberry" id="btnAdmin">
+            🍓
+            <span class="admin-tooltip">Área da Mamãe</span>
+        </button>
+    </div>
+</div>
+
+<!-- MODAL ADMIN -->
+<div class="modal-overlay" id="modalAdmin">
+    <div class="modal">
+        <button class="fechar" id="fecharModal">✕</button>
+        <h2>🍓 Painel da Mamãe</h2>
         <div class="senha-input">
             <input type="password" id="senhaAdmin" placeholder="Digite a senha" />
             <button id="btnAbrirAdmin">🔓 Ver respostas</button>
         </div>
+        <div id="mensagemErro" class="mensagem-erro"></div>
+        <div class="stats" id="stats" style="display:none;">
+            <span class="total" id="total">Total: 0</span>
+            <span class="sim" id="confirmados">✅ 0</span>
+            <span class="nao" id="recusados">❌ 0</span>
+        </div>
         <ul id="lista"></ul>
     </div>
 </div>
+
 <script>
-    document.getElementById('btnSim').onclick = function() {
-        var nome = prompt("Qual o seu nome? 💕");
-        if(nome) {
-            var msg = document.getElementById('mensagemRetorno');
-            msg.textContent = "🍓 Uhuuu! Te esperamos com muito carinho!";
-            msg.className = "mensagem-retorno visivel";
-            document.querySelectorAll('.btn').forEach(b => b.style.display = 'none');
-        }
+    // 🔥 CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELOS SEUS DADOS
+    const firebaseConfig = {
+        apiKey: "SEU_API_KEY",
+        authDomain: "SEU_PROJETO.firebaseapp.com",
+        projectId: "SEU_PROJETO_ID",
+        storageBucket: "SEU_PROJETO.appspot.com",
+        messagingSenderId: "SEU_SENDER_ID",
+        appId: "SEU_APP_ID"
     };
-    document.getElementById('btnNao').onclick = function() {
-        var nome = prompt("Qual o seu nome? 💕");
-        if(nome) {
-            var msg = document.getElementById('mensagemRetorno');
-            msg.textContent = "💔 Ah, que pena... mas obrigada por responder!";
-            msg.className = "mensagem-retorno visivel";
-            document.querySelectorAll('.btn').forEach(b => b.style.display = 'none');
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const respostasRef = db.collection("respostas");
+
+    const btnSim = document.getElementById('btnSim');
+    const btnNao = document.getElementById('btnNao');
+    const msgRetorno = document.getElementById('mensagemRetorno');
+
+    const modalAdmin = document.getElementById('modalAdmin');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const fecharModal = document.getElementById('fecharModal');
+    const senhaInput = document.getElementById('senhaAdmin');
+    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
+    const lista = document.getElementById('lista');
+    const stats = document.getElementById('stats');
+    const totalSpan = document.getElementById('total');
+    const confirmadosSpan = document.getElementById('confirmados');
+    const recusadosSpan = document.getElementById('recusados');
+    const msgErro = document.getElementById('mensagemErro');
+
+    const SENHA_CORRETA = "morango2026";
+
+    // Abrir modal
+    btnAdmin.addEventListener('click', () => {
+        modalAdmin.classList.add('aberto');
+        senhaInput.value = '';
+        lista.innerHTML = '';
+        stats.style.display = 'none';
+        msgErro.textContent = '';
+    });
+
+    // Fechar modal
+    fecharModal.addEventListener('click', () => {
+        modalAdmin.classList.remove('aberto');
+    });
+    modalAdmin.addEventListener('click', (e) => {
+        if (e.target === modalAdmin) modalAdmin.classList.remove('aberto');
+    });
+
+    function salvarResposta(comparece) {
+        const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
+        if (!nome) {
+            alert("Precisamos do seu nome para contar na lista!");
+            return;
         }
-    };
-    document.getElementById('btnAbrirAdmin').onclick = function() {
-        var senha = document.getElementById('senhaAdmin').value;
-        if(senha === "morango2026") {
-            document.getElementById('adminPanel').classList.add('visivel');
-            document.getElementById('lista').innerHTML = 
-                "<li><span>👩 Maria</span><span class='badge'>✅ Vai</span></li>" +
-                "<li><span>👨 João</span><span class='badge'>✅ Vai</span></li>" +
-                "<li><span>👩 Ana</span><span class='badge'>❌ Não vai</span></li>";
-        } else {
-            alert("Senha incorreta!");
+        const dados = {
+            nome: nome.trim(),
+            comparece: comparece,
+            data: new Date().toISOString()
+        };
+        respostasRef.add(dados)
+            .then(() => {
+                msgRetorno.textContent = comparece 
+                    ? "🍓 Uhuuu! Te esperamos com muito carinho!" 
+                    : "💔 Ah, que pena... mas ficamos felizes por você ter respondido!";
+                msgRetorno.className = "mensagem-retorno visivel";
+                btnSim.style.display = 'none';
+                btnNao.style.display = 'none';
+            })
+            .catch(err => {
+                alert("Erro ao salvar. Tente novamente: " + err.message);
+            });
+    }
+
+    btnSim.addEventListener('click', () => salvarResposta(true));
+    btnNao.addEventListener('click', () => salvarResposta(false));
+
+    function carregarRespostas() {
+        respostasRef.orderBy("data", "desc").get()
+            .then((snapshot) => {
+                lista.innerHTML = '';
+                stats.style.display = 'flex';
+                let total = 0, confirmados = 0, recusados = 0;
+
+                if (snapshot.empty) {
+                    lista.innerHTML = "<li style='justify-content:center;'>Ninguém respondeu ainda 😴</li>";
+                } else {
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        total++;
+                        if (data.comparece) confirmados++;
+                        else recusados++;
+                        const li = document.createElement('li');
+                        const status = data.comparece ? "✅ Vai" : "❌ Não vai";
+                        const dataFormatada = data.data ? new Date(data.data).toLocaleString('pt-BR') : '';
+                        li.innerHTML = `<span>${data.nome}</span><span class="badge">${status}</span><small>${dataFormatada}</small>`;
+                        lista.appendChild(li);
+                    });
+                }
+                totalSpan.textContent = `Total: ${total}`;
+                confirmadosSpan.textContent = `✅ ${confirmados}`;
+                recusadosSpan.textContent = `❌ ${recusados}`;
+            })
+            .catch(err => {
+                lista.innerHTML = `<li>Erro ao carregar: ${err.message}</li>`;
+            });
+    }
+
+    btnAbrirAdmin.addEventListener('click', () => {
+        const senha = senhaInput.value;
+        if (senha !== SENHA_CORRETA) {
+            msgErro.textContent = "❌ Senha incorreta! Tente novamente.";
+            return;
         }
-    };
+        msgErro.textContent = '';
+        carregarRespostas();
+    });
+
+    setInterval(() => {
+        if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
+            carregarRespostas();
+        }
+    }, 10000);
 </script>
 </body>
 </html>
