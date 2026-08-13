@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -310,7 +315,7 @@
             Quero muito você na minha festa 🎈
         </div>
         <div class="info-festa">
-            📅 19 de Setembro · 14h &nbsp;|&nbsp;
+            📅 19 de Setembro · 17h &nbsp;|&nbsp;
             <a href="https://maps.app.goo.gl/qfi1f1E9WsPWSTPq6" target="_blank">📍 Top Kid Riacho Fundo 2</a>
         </div>
     </div>
@@ -331,35 +336,27 @@
     </div>
 </div>
 
-<!-- MÚSICA INVISÍVEL -->
-<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
-    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<!-- MODAL ADMIN -->
+<div class="modal-overlay" id="modalAdmin">
+    <div class="modal">
+        <button class="fechar" id="fecharModal">✕</button>
+        <h2>🍓 Painel da Mamãe</h2>
+        <div class="senha-input">
+            <input type="password" id="senhaAdmin" placeholder="Digite a senha" />
+            <button id="btnAbrirAdmin">🔓 Ver respostas</button>
+        </div>
+        <div id="mensagemErro" class="mensagem-erro"></div>
+        <div class="stats" id="stats" style="display:none;">
+            <span class="total" id="total">Total: 0</span>
+            <span class="sim" id="confirmados">✅ 0</span>
+            <span class="nao" id="recusados">❌ 0</span>
+        </div>
+        <ul id="lista"></ul>
+    </div>
 </div>
-<script>
-    // Música invisível
-    (function() {
-        var iframe = document.getElementById("youtubePlayer");
-        var tocando = false;
-        function tocar() {
-            if (!tocando) {
-                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
-                tocando = true;
-            }
-        }
-        window.addEventListener("load", function() {
-            setTimeout(tocar, 500);
-        });
-        document.addEventListener("click", function() {
-            if (!tocando) tocar();
-        });
-        document.addEventListener("touchstart", function() {
-            if (!tocando) tocar();
-        });
-    })();
 
-    // =============================================
-    // FIREBASE - COLE SUAS CREDENCIAIS AQUI!
-    // =============================================
+<script>
+    // 🔥 CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELOS SEUS DADOS
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -373,12 +370,38 @@
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // =============================================
-    // BOTÕES DE RESPOSTA
-    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const msgRetorno = document.getElementById('mensagemRetorno');
+
+    const modalAdmin = document.getElementById('modalAdmin');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const fecharModal = document.getElementById('fecharModal');
+    const senhaInput = document.getElementById('senhaAdmin');
+    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
+    const lista = document.getElementById('lista');
+    const stats = document.getElementById('stats');
+    const totalSpan = document.getElementById('total');
+    const confirmadosSpan = document.getElementById('confirmados');
+    const recusadosSpan = document.getElementById('recusados');
+    const msgErro = document.getElementById('mensagemErro');
+
+    const SENHA_CORRETA = "morango2026";
+
+    btnAdmin.addEventListener('click', () => {
+        modalAdmin.classList.add('aberto');
+        senhaInput.value = '';
+        lista.innerHTML = '';
+        stats.style.display = 'none';
+        msgErro.textContent = '';
+    });
+
+    fecharModal.addEventListener('click', () => {
+        modalAdmin.classList.remove('aberto');
+    });
+    modalAdmin.addEventListener('click', (e) => {
+        if (e.target === modalAdmin) modalAdmin.classList.remove('aberto');
+    });
 
     function salvarResposta(comparece) {
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
@@ -405,40 +428,8 @@
             });
     }
 
-    btnSim.addEventListener('click', function() { salvarResposta(true); });
-    btnNao.addEventListener('click', function() { salvarResposta(false); });
-
-    // =============================================
-    // PAINEL ADMIN
-    // =============================================
-    const modalAdmin = document.getElementById('modalAdmin');
-    const btnAdmin = document.getElementById('btnAdmin');
-    const fecharModal = document.getElementById('fecharModal');
-    const senhaInput = document.getElementById('senhaAdmin');
-    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
-    const lista = document.getElementById('lista');
-    const stats = document.getElementById('stats');
-    const totalSpan = document.getElementById('total');
-    const confirmadosSpan = document.getElementById('confirmados');
-    const recusadosSpan = document.getElementById('recusados');
-    const msgErro = document.getElementById('mensagemErro');
-
-    const SENHA_CORRETA = "morango2026";
-
-    btnAdmin.addEventListener('click', function() {
-        modalAdmin.classList.add('aberto');
-        senhaInput.value = '';
-        lista.innerHTML = '';
-        stats.style.display = 'none';
-        msgErro.textContent = '';
-    });
-
-    fecharModal.addEventListener('click', function() {
-        modalAdmin.classList.remove('aberto');
-    });
-    modalAdmin.addEventListener('click', function(e) {
-        if (e.target === modalAdmin) modalAdmin.classList.remove('aberto');
-    });
+    btnSim.addEventListener('click', () => salvarResposta(true));
+    btnNao.addEventListener('click', () => salvarResposta(false));
 
     function carregarRespostas() {
         respostasRef.orderBy("data", "desc").get()
@@ -471,7 +462,7 @@
             });
     }
 
-    btnAbrirAdmin.addEventListener('click', function() {
+    btnAbrirAdmin.addEventListener('click', () => {
         const senha = senhaInput.value;
         if (senha !== SENHA_CORRETA) {
             msgErro.textContent = "❌ Senha incorreta! Tente novamente.";
@@ -481,8 +472,7 @@
         carregarRespostas();
     });
 
-    // Atualiza a lista automaticamente
-    setInterval(function() {
+    setInterval(() => {
         if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
             carregarRespostas();
         }
