@@ -4,10 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
-
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -204,8 +202,7 @@
             z-index: 999;
             padding: 20px;
         }
-        .modal-overlay.aberto { display: flex; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        .modal-overlay.aberto { display: flex !important; }
         .modal {
             background: white;
             border-radius: 60px 60px 40px 40px;
@@ -369,32 +366,47 @@
 </div>
 
 <!-- MÚSICA INVISÍVEL (YOUTUBE) -->
-<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
-    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+<!-- MODAL ADMIN -->
+<div class="modal-overlay" id="modalAdmin">
+    <div class="modal">
+        <button class="fechar" id="fecharModal">✕</button>
+        <h2>🍓 Painel da Mamãe</h2>
+        <div class="senha-input">
+            <input type="password" id="senhaAdmin" placeholder="Digite a senha" />
+            <button id="btnAbrirAdmin">🔓 Ver respostas</button>
+        </div>
+        <div id="mensagemErro" class="mensagem-erro"></div>
+        <div class="stats" id="stats" style="display:none;">
+            <span class="total" id="total">Total: 0</span>
+            <span class="sim" id="confirmados">✅ 0</span>
+            <span class="nao" id="recusados">❌ 0</span>
+        </div>
+        <ul id="lista"></ul>
+    </div>
 </div>
 
 <script>
+    // =============================================
+    // MÚSICA - FORÇA O PLAY
+    // =============================================
     (function() {
-        var iframe = document.getElementById("youtubePlayer");
-        var tocando = false;
-        function tocar() {
-            if (!tocando) {
-                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
-                tocando = true;
-            }
+        var iframe = document.getElementById('youtubePlayer');
+        function recarregar() {
+            iframe.src = iframe.src;
         }
-        window.addEventListener("load", function() {
-            tocar();
-            setTimeout(tocar, 1000);
+        window.addEventListener('load', function() {
+            setTimeout(recarregar, 300);
+            setTimeout(recarregar, 1000);
         });
-        document.addEventListener("click", function() {
-            if (!tocando) tocar();
-        });
-        document.addEventListener("touchstart", function() {
-            if (!tocando) tocar();
-        });
+        document.addEventListener('click', recarregar);
+        document.addEventListener('touchstart', recarregar);
     })();
 
+    // =============================================
+    // FIREBASE
+    // =============================================
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -407,6 +419,9 @@
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
+    // =============================================
+    // BOTÕES RESPOSTA E BALÕES
+    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const respostaContainer = document.getElementById('respostaContainer');
@@ -449,7 +464,7 @@
     btnNao.addEventListener('click', function() { salvarResposta(false); });
 
     // =============================================
-    // PAINEL ADMIN (BOTÃO MORANGO)
+    // PAINEL ADMIN - CORRIGIDO (FORÇA ABERTURA)
     // =============================================
     const modalAdmin = document.getElementById('modalAdmin');
     const btnAdmin = document.getElementById('btnAdmin');
@@ -465,10 +480,10 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    // Abrir modal
+    // Abrir modal (usando style diretamente)
     btnAdmin.addEventListener('click', function(e) {
         e.stopPropagation();
-        modalAdmin.classList.add('aberto');
+        modalAdmin.style.display = 'flex';
         senhaInput.value = '';
         lista.innerHTML = '';
         stats.style.display = 'none';
@@ -477,12 +492,11 @@
 
     // Fechar modal
     fecharModal.addEventListener('click', function() {
-        modalAdmin.classList.remove('aberto');
+        modalAdmin.style.display = 'none';
     });
-
     modalAdmin.addEventListener('click', function(e) {
         if (e.target === modalAdmin) {
-            modalAdmin.classList.remove('aberto');
+            modalAdmin.style.display = 'none';
         }
     });
 
@@ -527,7 +541,7 @@
     });
 
     setInterval(function() {
-        if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
+        if (modalAdmin.style.display === 'flex' && stats.style.display !== 'none') {
             carregarRespostas();
         }
     }, 10000);
