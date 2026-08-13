@@ -170,7 +170,6 @@
             color: #b26a7a;
             font-size: 0.9rem;
         }
-
         .admin-strawberry {
             position: relative;
             display: inline-block;
@@ -321,15 +320,12 @@
 </head>
 <body>
 <div class="container">
-
     <div class="header">
         <h1>🍓 1 aninho 🍓<small>da nossa princesinha</small></h1>
     </div>
-
     <div class="foto-container">
         <img src="foto.jpg" alt="Foto da aniversariante" />
     </div>
-
     <div class="convite-texto">
         <span class="destaque">
             Ontem fui um sonho,<br>hoje sou realidade.
@@ -344,18 +340,15 @@
             <a href="https://maps.app.goo.gl/qfi1f1E9WsPWSTPq6" target="_blank">📍 Top Kid Riacho Fundo 2</a>
         </div>
     </div>
-
     <div class="botoes">
         <button class="btn btn-sim" id="btnSim">🍓 VOU SIM!</button>
         <button class="btn btn-nao" id="btnNao">😔 Não vou</button>
     </div>
-
     <div class="resposta-container" id="respostaContainer">
         <div class="baloes" id="baloes"></div>
         <div class="titulo-resposta" id="tituloResposta"></div>
         <div class="subtitulo-resposta" id="subtituloResposta"></div>
     </div>
-
     <div class="rodape">
         💖 Traga um sorriso, leve um moranguinho
         <button class="admin-strawberry" id="btnAdmin">
@@ -365,7 +358,7 @@
     </div>
 </div>
 
-<!-- MÚSICA INVISÍVEL (YOUTUBE) -->
+<!-- MÚSICA: iframe invisível + áudio HTML5 como fallback -->
 <iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 <!-- MODAL ADMIN -->
@@ -388,25 +381,24 @@
 </div>
 
 <script>
-    // =============================================
-    // MÚSICA - FORÇA O PLAY
-    // =============================================
+    // ========== MÚSICA: FORÇA AUTOPLAY ==========
     (function() {
         var iframe = document.getElementById('youtubePlayer');
         function recarregar() {
+            // Recarrega o iframe para ativar o autoplay
             iframe.src = iframe.src;
         }
         window.addEventListener('load', function() {
-            setTimeout(recarregar, 300);
-            setTimeout(recarregar, 1000);
+            recarregar();
+            setTimeout(recarregar, 500);
+            setTimeout(recarregar, 1200);
         });
+        // Se o usuário interagir, recarrega também (garantia)
         document.addEventListener('click', recarregar);
         document.addEventListener('touchstart', recarregar);
     })();
 
-    // =============================================
-    // FIREBASE
-    // =============================================
+    // ========== FIREBASE ==========
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -419,9 +411,7 @@
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // =============================================
-    // BOTÕES RESPOSTA E BALÕES
-    // =============================================
+    // ========== BOTÕES E BALÕES ==========
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const respostaContainer = document.getElementById('respostaContainer');
@@ -453,19 +443,15 @@
             return;
         }
         const dados = { nome: nome.trim(), comparece: comparece, data: new Date().toISOString() };
-        respostasRef.add(dados).then(() => {
-            mostrarResposta(comparece, nome.trim());
-        }).catch(err => {
-            alert("Erro ao salvar. Tente novamente: " + err.message);
-        });
+        respostasRef.add(dados)
+            .then(() => { mostrarResposta(comparece, nome.trim()); })
+            .catch(err => { alert("Erro ao salvar: " + err.message); });
     }
 
     btnSim.addEventListener('click', function() { salvarResposta(true); });
     btnNao.addEventListener('click', function() { salvarResposta(false); });
 
-    // =============================================
-    // PAINEL ADMIN - CORRIGIDO (FORÇA ABERTURA)
-    // =============================================
+    // ========== PAINEL ADMIN - MORANGO ==========
     const modalAdmin = document.getElementById('modalAdmin');
     const btnAdmin = document.getElementById('btnAdmin');
     const fecharModal = document.getElementById('fecharModal');
@@ -480,7 +466,7 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    // Abrir modal (usando style diretamente)
+    // ABRIR MODAL (força display flex)
     btnAdmin.addEventListener('click', function(e) {
         e.stopPropagation();
         modalAdmin.style.display = 'flex';
@@ -490,7 +476,7 @@
         msgErro.textContent = '';
     });
 
-    // Fechar modal
+    // FECHAR MODAL
     fecharModal.addEventListener('click', function() {
         modalAdmin.style.display = 'none';
     });
@@ -540,6 +526,7 @@
         carregarRespostas();
     });
 
+    // Atualiza a lista a cada 10s se o modal estiver aberto
     setInterval(function() {
         if (modalAdmin.style.display === 'flex' && stats.style.display !== 'none') {
             carregarRespostas();
