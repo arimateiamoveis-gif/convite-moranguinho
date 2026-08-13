@@ -336,27 +336,39 @@
     </div>
 </div>
 
-<!-- MODAL ADMIN -->
-<div class="modal-overlay" id="modalAdmin">
-    <div class="modal">
-        <button class="fechar" id="fecharModal">✕</button>
-        <h2>🍓 Painel da Mamãe</h2>
-        <div class="senha-input">
-            <input type="password" id="senhaAdmin" placeholder="Digite a senha" />
-            <button id="btnAbrirAdmin">🔓 Ver respostas</button>
-        </div>
-        <div id="mensagemErro" class="mensagem-erro"></div>
-        <div class="stats" id="stats" style="display:none;">
-            <span class="total" id="total">Total: 0</span>
-            <span class="sim" id="confirmados">✅ 0</span>
-            <span class="nao" id="recusados">❌ 0</span>
-        </div>
-        <ul id="lista"></ul>
-    </div>
+<!-- MÚSICA INVISÍVEL (YOUTUBE) -->
+<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
+    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 </div>
 
 <script>
-    // 🔥 CONFIGURAÇÃO DO FIREBASE - SUBSTITUA PELOS SEUS DADOS
+    // =============================================
+    // MÚSICA INVISÍVEL - TOCA NO PRIMEIRO CLIQUE
+    // =============================================
+    (function() {
+        var iframe = document.getElementById("youtubePlayer");
+        var tocando = false;
+        function tocar() {
+            if (!tocando) {
+                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
+                tocando = true;
+                console.log("🎵 Música ativada!");
+            }
+        }
+        window.addEventListener("load", function() {
+            setTimeout(tocar, 500);
+        });
+        document.addEventListener("click", function() {
+            if (!tocando) tocar();
+        });
+        document.addEventListener("touchstart", function() {
+            if (!tocando) tocar();
+        });
+    })();
+
+    // =============================================
+    // FIREBASE - COLE SUAS CREDENCIAIS AQUI!
+    // =============================================
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -370,38 +382,12 @@
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
+    // =============================================
+    // BOTÕES DE RESPOSTA (CORRIGIDOS)
+    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const msgRetorno = document.getElementById('mensagemRetorno');
-
-    const modalAdmin = document.getElementById('modalAdmin');
-    const btnAdmin = document.getElementById('btnAdmin');
-    const fecharModal = document.getElementById('fecharModal');
-    const senhaInput = document.getElementById('senhaAdmin');
-    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
-    const lista = document.getElementById('lista');
-    const stats = document.getElementById('stats');
-    const totalSpan = document.getElementById('total');
-    const confirmadosSpan = document.getElementById('confirmados');
-    const recusadosSpan = document.getElementById('recusados');
-    const msgErro = document.getElementById('mensagemErro');
-
-    const SENHA_CORRETA = "morango2026";
-
-    btnAdmin.addEventListener('click', () => {
-        modalAdmin.classList.add('aberto');
-        senhaInput.value = '';
-        lista.innerHTML = '';
-        stats.style.display = 'none';
-        msgErro.textContent = '';
-    });
-
-    fecharModal.addEventListener('click', () => {
-        modalAdmin.classList.remove('aberto');
-    });
-    modalAdmin.addEventListener('click', (e) => {
-        if (e.target === modalAdmin) modalAdmin.classList.remove('aberto');
-    });
 
     function salvarResposta(comparece) {
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
@@ -428,8 +414,48 @@
             });
     }
 
-    btnSim.addEventListener('click', () => salvarResposta(true));
-    btnNao.addEventListener('click', () => salvarResposta(false));
+    btnSim.addEventListener('click', function() {
+        salvarResposta(true);
+    });
+
+    btnNao.addEventListener('click', function() {
+        salvarResposta(false);
+    });
+
+    // =============================================
+    // PAINEL ADMIN
+    // =============================================
+    const modalAdmin = document.getElementById('modalAdmin');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const fecharModal = document.getElementById('fecharModal');
+    const senhaInput = document.getElementById('senhaAdmin');
+    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
+    const lista = document.getElementById('lista');
+    const stats = document.getElementById('stats');
+    const totalSpan = document.getElementById('total');
+    const confirmadosSpan = document.getElementById('confirmados');
+    const recusadosSpan = document.getElementById('recusados');
+    const msgErro = document.getElementById('mensagemErro');
+
+    const SENHA_CORRETA = "morango2026";
+
+    btnAdmin.addEventListener('click', function() {
+        modalAdmin.classList.add('aberto');
+        senhaInput.value = '';
+        lista.innerHTML = '';
+        stats.style.display = 'none';
+        msgErro.textContent = '';
+    });
+
+    fecharModal.addEventListener('click', function() {
+        modalAdmin.classList.remove('aberto');
+    });
+
+    modalAdmin.addEventListener('click', function(e) {
+        if (e.target === modalAdmin) {
+            modalAdmin.classList.remove('aberto');
+        }
+    });
 
     function carregarRespostas() {
         respostasRef.orderBy("data", "desc").get()
@@ -462,7 +488,7 @@
             });
     }
 
-    btnAbrirAdmin.addEventListener('click', () => {
+    btnAbrirAdmin.addEventListener('click', function() {
         const senha = senhaInput.value;
         if (senha !== SENHA_CORRETA) {
             msgErro.textContent = "❌ Senha incorreta! Tente novamente.";
@@ -472,7 +498,8 @@
         carregarRespostas();
     });
 
-    setInterval(() => {
+    // Atualiza lista automaticamente a cada 10 segundos
+    setInterval(function() {
         if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
             carregarRespostas();
         }
