@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
 
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
@@ -75,21 +74,24 @@
             text-align: center;
         }
         .convite-texto .destaque {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 900;
             color: #c44a6a;
             display: block;
+            line-height: 1.4;
         }
         .convite-texto .destaque small {
             font-size: 1.2rem;
             font-weight: 600;
             color: #8f334b;
             display: block;
+            margin-top: 6px;
         }
         .convite-texto .mensagem {
             font-size: 1.2rem;
             color: #5e2e3a;
-            margin-top: 10px;
+            margin-top: 12px;
+            font-style: italic;
         }
         .info-festa {
             background: #ffd9e0;
@@ -127,17 +129,43 @@
         .btn-nao { background: #d3d3d3; color: #4a4a4a; }
         .btn-nao:hover { background: #bfbfbf; }
         .btn:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,0.12); }
-        .mensagem-retorno {
-            font-size: 1.2rem;
-            background: #d4edda;
-            border-radius: 60px;
-            padding: 14px;
+
+        .resposta-container {
             display: none;
-            margin-top: 15px;
-            border: 2px solid #a3d8b5;
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 40px;
+            text-align: center;
+            animation: fadeUp 0.8s ease;
         }
-        .mensagem-retorno.visivel { display: block; animation: fade 0.5s; }
-        @keyframes fade { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+        .resposta-container.visivel { display: block; }
+        @keyframes fadeUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .resposta-container .baloes {
+            font-size: 3.5rem;
+            letter-spacing: 8px;
+            animation: balancar 2s infinite alternate;
+        }
+        @keyframes balancar {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+        .resposta-container .titulo-resposta {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin: 10px 0 5px;
+        }
+        .resposta-container .subtitulo-resposta {
+            font-size: 1.1rem;
+            color: #5e2e3a;
+        }
+        .resposta-container.sim .titulo-resposta { color: #4caf50; }
+        .resposta-container.nao .titulo-resposta { color: #d32f2f; }
+        .resposta-container.sim { background: #e8f5e9; border: 2px solid #4caf50; }
+        .resposta-container.nao { background: #ffebee; border: 2px solid #d32f2f; }
+
         .rodape {
             text-align: center;
             margin-top: 20px;
@@ -289,7 +317,7 @@
         }
         @media (max-width: 480px) {
             .header h1 { font-size: 1.8rem; }
-            .convite-texto .destaque { font-size: 1.6rem; }
+            .convite-texto .destaque { font-size: 1.4rem; }
             .btn { font-size: 1.1rem; padding: 14px 20px; }
         }
     </style>
@@ -307,8 +335,8 @@
 
     <div class="convite-texto">
         <span class="destaque">
-            VENHA COMEMORAR COMIGO!
-            <small>VOCÊ É MEU CONVIDADO ESPECIAL!</small>
+            Ontem fui um sonho,<br>hoje sou realidade.
+            <small>Faz um ano que cheguei trazendo alegria e felicidade!</small>
         </span>
         <div class="mensagem">
             Estou crescendo e vou fazer <strong>1 ano</strong>!<br>
@@ -325,7 +353,11 @@
         <button class="btn btn-nao" id="btnNao">😔 Não vou</button>
     </div>
 
-    <div class="mensagem-retorno" id="mensagemRetorno"></div>
+    <div class="resposta-container" id="respostaContainer">
+        <div class="baloes" id="baloes"></div>
+        <div class="titulo-resposta" id="tituloResposta"></div>
+        <div class="subtitulo-resposta" id="subtituloResposta"></div>
+    </div>
 
     <div class="rodape">
         💖 Traga um sorriso, leve um moranguinho
@@ -342,9 +374,6 @@
 </div>
 
 <script>
-    // =============================================
-    // MÚSICA INVISÍVEL - TOCA NO PRIMEIRO CLIQUE
-    // =============================================
     (function() {
         var iframe = document.getElementById("youtubePlayer");
         var tocando = false;
@@ -352,11 +381,11 @@
             if (!tocando) {
                 iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
                 tocando = true;
-                console.log("🎵 Música ativada!");
             }
         }
         window.addEventListener("load", function() {
-            setTimeout(tocar, 500);
+            tocar();
+            setTimeout(tocar, 1000);
         });
         document.addEventListener("click", function() {
             if (!tocando) tocar();
@@ -366,9 +395,6 @@
         });
     })();
 
-    // =============================================
-    // FIREBASE - COLE SUAS CREDENCIAIS AQUI!
-    // =============================================
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -377,17 +403,33 @@
         messagingSenderId: "SEU_SENDER_ID",
         appId: "SEU_APP_ID"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // =============================================
-    // BOTÕES DE RESPOSTA (CORRIGIDOS)
-    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
-    const msgRetorno = document.getElementById('mensagemRetorno');
+    const respostaContainer = document.getElementById('respostaContainer');
+    const baloes = document.getElementById('baloes');
+    const tituloResposta = document.getElementById('tituloResposta');
+    const subtituloResposta = document.getElementById('subtituloResposta');
+
+    function mostrarResposta(comparece, nome) {
+        btnSim.style.display = 'none';
+        btnNao.style.display = 'none';
+        respostaContainer.classList.add('visivel');
+        if (comparece) {
+            respostaContainer.className = 'resposta-container visivel sim';
+            baloes.textContent = '🎈🎉🎈🎉🎈';
+            tituloResposta.textContent = 'Que alegria, ' + nome + '! 🥳';
+            subtituloResposta.textContent = 'Você faz parte desse momento especial! Te esperamos com muito carinho 💖';
+        } else {
+            respostaContainer.className = 'resposta-container visivel nao';
+            baloes.textContent = '💔😢💔';
+            tituloResposta.textContent = 'Ah, ' + nome + '... que pena!';
+            subtituloResposta.textContent = 'Ficamos tristes por não ter você presente, mas agradecemos por ter respondido. 🥺';
+        }
+    }
 
     function salvarResposta(comparece) {
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
@@ -395,35 +437,19 @@
             alert("Precisamos do seu nome para contar na lista!");
             return;
         }
-        const dados = {
-            nome: nome.trim(),
-            comparece: comparece,
-            data: new Date().toISOString()
-        };
-        respostasRef.add(dados)
-            .then(() => {
-                msgRetorno.textContent = comparece 
-                    ? "🍓 Uhuuu! Te esperamos com muito carinho!" 
-                    : "💔 Ah, que pena... mas ficamos felizes por você ter respondido!";
-                msgRetorno.className = "mensagem-retorno visivel";
-                btnSim.style.display = 'none';
-                btnNao.style.display = 'none';
-            })
-            .catch(err => {
-                alert("Erro ao salvar. Tente novamente: " + err.message);
-            });
+        const dados = { nome: nome.trim(), comparece: comparece, data: new Date().toISOString() };
+        respostasRef.add(dados).then(() => {
+            mostrarResposta(comparece, nome.trim());
+        }).catch(err => {
+            alert("Erro ao salvar. Tente novamente: " + err.message);
+        });
     }
 
-    btnSim.addEventListener('click', function() {
-        salvarResposta(true);
-    });
-
-    btnNao.addEventListener('click', function() {
-        salvarResposta(false);
-    });
+    btnSim.addEventListener('click', function() { salvarResposta(true); });
+    btnNao.addEventListener('click', function() { salvarResposta(false); });
 
     // =============================================
-    // PAINEL ADMIN
+    // PAINEL ADMIN (BOTÃO MORANGO)
     // =============================================
     const modalAdmin = document.getElementById('modalAdmin');
     const btnAdmin = document.getElementById('btnAdmin');
@@ -439,7 +465,9 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    btnAdmin.addEventListener('click', function() {
+    // Abrir modal
+    btnAdmin.addEventListener('click', function(e) {
+        e.stopPropagation();
         modalAdmin.classList.add('aberto');
         senhaInput.value = '';
         lista.innerHTML = '';
@@ -447,6 +475,7 @@
         msgErro.textContent = '';
     });
 
+    // Fechar modal
     fecharModal.addEventListener('click', function() {
         modalAdmin.classList.remove('aberto');
     });
@@ -463,7 +492,6 @@
                 lista.innerHTML = '';
                 stats.style.display = 'flex';
                 let total = 0, confirmados = 0, recusados = 0;
-
                 if (snapshot.empty) {
                     lista.innerHTML = "<li style='justify-content:center;'>Ninguém respondeu ainda 😴</li>";
                 } else {
@@ -498,7 +526,6 @@
         carregarRespostas();
     });
 
-    // Atualiza lista automaticamente a cada 10 segundos
     setInterval(function() {
         if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
             carregarRespostas();
