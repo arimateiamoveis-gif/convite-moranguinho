@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -140,7 +140,6 @@
             font-size: 0.9rem;
         }
 
-        /* BOTÃO MORANGO ADMIN */
         .admin-strawberry {
             position: relative;
             display: inline-block;
@@ -152,12 +151,8 @@
             border: none;
             filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
         }
-        .admin-strawberry:hover {
-            transform: scale(1.15) rotate(-8deg);
-        }
-        .admin-strawberry:active {
-            transform: scale(0.9);
-        }
+        .admin-strawberry:hover { transform: scale(1.15) rotate(-8deg); }
+        .admin-strawberry:active { transform: scale(0.9); }
         .admin-tooltip {
             font-size: 0.65rem;
             color: #c47a8a;
@@ -165,7 +160,6 @@
             margin-top: 2px;
         }
 
-        /* MODAL ADMIN */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -177,10 +171,7 @@
             z-index: 999;
             padding: 20px;
         }
-        .modal-overlay.aberto {
-            display: flex;
-            animation: fadeIn 0.3s;
-        }
+        .modal-overlay.aberto { display: flex; animation: fadeIn 0.3s; }
         @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         .modal {
             background: white;
@@ -340,9 +331,35 @@
     </div>
 </div>
 
-
+<!-- MÚSICA INVISÍVEL -->
+<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
+    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+</div>
 <script>
-    // Inicialização do Firebase (já existente)
+    // Música invisível
+    (function() {
+        var iframe = document.getElementById("youtubePlayer");
+        var tocando = false;
+        function tocar() {
+            if (!tocando) {
+                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
+                tocando = true;
+            }
+        }
+        window.addEventListener("load", function() {
+            setTimeout(tocar, 500);
+        });
+        document.addEventListener("click", function() {
+            if (!tocando) tocar();
+        });
+        document.addEventListener("touchstart", function() {
+            if (!tocando) tocar();
+        });
+    })();
+
+    // =============================================
+    // FIREBASE - COLE SUAS CREDENCIAIS AQUI!
+    // =============================================
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -351,72 +368,125 @@
         messagingSenderId: "SEU_SENDER_ID",
         appId: "SEU_APP_ID"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // Elementos do convite
+    // =============================================
+    // BOTÕES DE RESPOSTA
+    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const msgRetorno = document.getElementById('mensagemRetorno');
 
-    // Música invisível: tenta tocar ao carregar
-    (function() {
-        var iframe = document.getElementById("youtubePlayer");
-        function tocar() {
-            // Recarrega o iframe para forçar o autoplay
-            iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
+    function salvarResposta(comparece) {
+        const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
+        if (!nome) {
+            alert("Precisamos do seu nome para contar na lista!");
+            return;
         }
-        window.addEventListener("load", function() {
-            // Toca imediatamente
-            tocar();
-            // Se falhar, o usuário clica em qualquer lugar para ativar
-            document.addEventListener("click", function() {
-                var src = iframe.src;
-                if (src.indexOf("autoplay=1") === -1) {
-                    tocar();
-                }
-            }, { once: true });
-            document.addEventListener("touchstart", function() {
-                var src = iframe.src;
-                if (src.indexOf("autoplay=1") === -1) {
-                    tocar();
-                }
-            }, { once: true });
-        });
-    })();
+        const dados = {
+            nome: nome.trim(),
+            comparece: comparece,
+            data: new Date().toISOString()
+        };
+        respostasRef.add(dados)
+            .then(() => {
+                msgRetorno.textContent = comparece 
+                    ? "🍓 Uhuuu! Te esperamos com muito carinho!" 
+                    : "💔 Ah, que pena... mas ficamos felizes por você ter respondido!";
+                msgRetorno.className = "mensagem-retorno visivel";
+                btnSim.style.display = 'none';
+                btnNao.style.display = 'none';
+            })
+            .catch(err => {
+                alert("Erro ao salvar. Tente novamente: " + err.message);
+            });
+    }
 
-    // Funções de resposta e admin (mantidas do original)
-    // ... (o restante do JavaScript continua igual)
+    btnSim.addEventListener('click', function() { salvarResposta(true); });
+    btnNao.addEventListener('click', function() { salvarResposta(false); });
+
+    // =============================================
+    // PAINEL ADMIN
+    // =============================================
+    const modalAdmin = document.getElementById('modalAdmin');
+    const btnAdmin = document.getElementById('btnAdmin');
+    const fecharModal = document.getElementById('fecharModal');
+    const senhaInput = document.getElementById('senhaAdmin');
+    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
+    const lista = document.getElementById('lista');
+    const stats = document.getElementById('stats');
+    const totalSpan = document.getElementById('total');
+    const confirmadosSpan = document.getElementById('confirmados');
+    const recusadosSpan = document.getElementById('recusados');
+    const msgErro = document.getElementById('mensagemErro');
+
+    const SENHA_CORRETA = "morango2026";
+
+    btnAdmin.addEventListener('click', function() {
+        modalAdmin.classList.add('aberto');
+        senhaInput.value = '';
+        lista.innerHTML = '';
+        stats.style.display = 'none';
+        msgErro.textContent = '';
+    });
+
+    fecharModal.addEventListener('click', function() {
+        modalAdmin.classList.remove('aberto');
+    });
+    modalAdmin.addEventListener('click', function(e) {
+        if (e.target === modalAdmin) modalAdmin.classList.remove('aberto');
+    });
+
+    function carregarRespostas() {
+        respostasRef.orderBy("data", "desc").get()
+            .then((snapshot) => {
+                lista.innerHTML = '';
+                stats.style.display = 'flex';
+                let total = 0, confirmados = 0, recusados = 0;
+
+                if (snapshot.empty) {
+                    lista.innerHTML = "<li style='justify-content:center;'>Ninguém respondeu ainda 😴</li>";
+                } else {
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        total++;
+                        if (data.comparece) confirmados++;
+                        else recusados++;
+                        const li = document.createElement('li');
+                        const status = data.comparece ? "✅ Vai" : "❌ Não vai";
+                        const dataFormatada = data.data ? new Date(data.data).toLocaleString('pt-BR') : '';
+                        li.innerHTML = `<span>${data.nome}</span><span class="badge">${status}</span><small>${dataFormatada}</small>`;
+                        lista.appendChild(li);
+                    });
+                }
+                totalSpan.textContent = `Total: ${total}`;
+                confirmadosSpan.textContent = `✅ ${confirmados}`;
+                recusadosSpan.textContent = `❌ ${recusados}`;
+            })
+            .catch(err => {
+                lista.innerHTML = `<li>Erro ao carregar: ${err.message}</li>`;
+            });
+    }
+
+    btnAbrirAdmin.addEventListener('click', function() {
+        const senha = senhaInput.value;
+        if (senha !== SENHA_CORRETA) {
+            msgErro.textContent = "❌ Senha incorreta! Tente novamente.";
+            return;
+        }
+        msgErro.textContent = '';
+        carregarRespostas();
+    });
+
+    // Atualiza a lista automaticamente
+    setInterval(function() {
+        if (modalAdmin.classList.contains('aberto') && stats.style.display !== 'none') {
+            carregarRespostas();
+        }
+    }, 10000);
 </script>
 </body>
 </html>
-
-<!-- MÚSICA INVISÍVEL (YOUTUBE) - TOCA NO PRIMEIRO CLIQUE -->
-<div style="position:fixed; top:-9999px; left:-9999px; width:1px; height:1px; overflow:hidden;">
-    <iframe id="youtubePlayer" width="1" height="1" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-</div>
-<script>
-    (function() {
-        var iframe = document.getElementById("youtubePlayer");
-        var tocando = false;
-        function tocar() {
-            if (!tocando) {
-                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
-                tocando = true;
-                console.log("🎵 Música ativada!");
-            }
-        }
-        // Tenta tocar ao carregar (pode ser bloqueado)
-        window.addEventListener("load", function() {
-            setTimeout(tocar, 100);
-        });
-        // No primeiro clique/toque em qualquer lugar, toca (se ainda não tiver)
-        document.addEventListener("click", function() {
-            if (!tocando) tocar();
-        });
-        document.addEventListener("touchstart", function() {
-            if (!tocando) tocar();
-        });
-    })();
-</script>
