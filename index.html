@@ -358,9 +358,6 @@
     </div>
 </div>
 
-<!-- MÚSICA: iframe invisível + áudio HTML5 como fallback -->
-<iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
 <!-- MODAL ADMIN -->
 <div class="modal-overlay" id="modalAdmin">
     <div class="modal">
@@ -381,24 +378,7 @@
 </div>
 
 <script>
-    // ========== MÚSICA: FORÇA AUTOPLAY ==========
-    (function() {
-        var iframe = document.getElementById('youtubePlayer');
-        function recarregar() {
-            // Recarrega o iframe para ativar o autoplay
-            iframe.src = iframe.src;
-        }
-        window.addEventListener('load', function() {
-            recarregar();
-            setTimeout(recarregar, 500);
-            setTimeout(recarregar, 1200);
-        });
-        // Se o usuário interagir, recarrega também (garantia)
-        document.addEventListener('click', recarregar);
-        document.addEventListener('touchstart', recarregar);
-    })();
-
-    // ========== FIREBASE ==========
+    // ========== FIREBASE - SUBSTITUA AQUI PELAS SUAS CREDENCIAIS ==========
     const firebaseConfig = {
         apiKey: "SEU_API_KEY",
         authDomain: "SEU_PROJETO.firebaseapp.com",
@@ -407,6 +387,8 @@
         messagingSenderId: "SEU_SENDER_ID",
         appId: "SEU_APP_ID"
     };
+
+    // Inicializa Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
@@ -442,10 +424,19 @@
             alert("Precisamos do seu nome para contar na lista!");
             return;
         }
-        const dados = { nome: nome.trim(), comparece: comparece, data: new Date().toISOString() };
+        const dados = {
+            nome: nome.trim(),
+            comparece: comparece,
+            data: new Date().toISOString()
+        };
         respostasRef.add(dados)
-            .then(() => { mostrarResposta(comparece, nome.trim()); })
-            .catch(err => { alert("Erro ao salvar: " + err.message); });
+            .then(() => {
+                mostrarResposta(comparece, nome.trim());
+            })
+            .catch(err => {
+                alert("Erro ao salvar: " + err.message + "\nVerifique suas credenciais do Firebase.");
+                console.error(err);
+            });
     }
 
     btnSim.addEventListener('click', function() { salvarResposta(true); });
@@ -466,7 +457,7 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    // ABRIR MODAL (força display flex)
+    // Abrir modal
     btnAdmin.addEventListener('click', function(e) {
         e.stopPropagation();
         modalAdmin.style.display = 'flex';
@@ -476,7 +467,7 @@
         msgErro.textContent = '';
     });
 
-    // FECHAR MODAL
+    // Fechar modal
     fecharModal.addEventListener('click', function() {
         modalAdmin.style.display = 'none';
     });
