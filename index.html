@@ -359,7 +359,7 @@
     </div>
 </div>
 
-<!-- MÚSICA DO YOUTUBE INVISÍVEL (NÃO PRECISA DE MP3) -->
+<!-- MÚSICA DO YOUTUBE (INVISÍVEL) -->
 <iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 <!-- MODAL ADMIN -->
@@ -382,7 +382,7 @@
 </div>
 
 <script>
-    // ========== MÚSICA - RECARREGA O IFRAME PARA ATIVAR AUTOPLAY ==========
+    // ========== MÚSICA - TOCA AUTOMATICAMENTE ==========
     (function() {
         var iframe = document.getElementById('youtubePlayer');
         function recarregar() {
@@ -397,8 +397,15 @@
         document.addEventListener('touchstart', recarregar);
     })();
 
-    cd ~/convite-moranguinho
-nano index.html
+    // ========== FIREBASE - COLOQUE SUAS CREDENCIAIS AQUI ==========
+    const firebaseConfig = {
+        apiKey: "SEU_API_KEY",
+        authDomain: "SEU_PROJETO.firebaseapp.com",
+        projectId: "SEU_PROJETO_ID",
+        storageBucket: "SEU_PROJETO.appspot.com",
+        messagingSenderId: "SEU_SENDER_ID",
+        appId: "SEU_APP_ID"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
