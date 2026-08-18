@@ -382,19 +382,46 @@
 </div>
 
 <script>
-    // ========== MÚSICA - TOCA AUTOMATICAMENTE ==========
+    // ========== MÚSICA - TOCA APÓS O PRIMEIRO CLIQUE ==========
+
     (function() {
-        var iframe = document.getElementById('youtubePlayer');
-        function recarregar() {
-            iframe.src = iframe.src;
+
+        var iframe = document.getElementById("youtubePlayer");
+
+        var tocando = false;
+
+        function tocar() {
+
+            if (!tocando) {
+
+                iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
+
+                tocando = true;
+
+                console.log("🎵 Música ativada!");
+
+            }
+
         }
-        window.addEventListener('load', function() {
-            recarregar();
-            setTimeout(recarregar, 500);
-            setTimeout(recarregar, 1000);
+
+        window.addEventListener("load", function() {
+
+            setTimeout(tocar, 500);
+
         });
-        document.addEventListener('click', recarregar);
-        document.addEventListener('touchstart', recarregar);
+
+        document.addEventListener("click", function() {
+
+            if (!tocando) tocar();
+
+        });
+
+        document.addEventListener("touchstart", function() {
+
+            if (!tocando) tocar();
+
+        });
+
     })();
 
     // ========== FIREBASE - COLOQUE SUAS CREDENCIAIS AQUI ==========
@@ -437,11 +464,44 @@
     }
 
     function salvarResposta(comparece) {
+
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
+
         if (!nome) {
+
             alert("Precisamos do seu nome para contar na lista!");
+
             return;
+
         }
+
+        const dados = {
+
+            nome: nome.trim(),
+
+            comparece: comparece,
+
+            data: new Date().toISOString()
+
+        };
+
+        respostasRef.add(dados)
+
+            .then(() => {
+
+                mostrarResposta(comparece, nome.trim());
+
+            })
+
+            .catch(err => {
+
+                alert("Erro ao salvar: " + err.message);
+
+                console.error(err);
+
+            });
+
+    }
         const dados = {
             nome: nome.trim(),
             comparece: comparece,
