@@ -156,8 +156,9 @@
             margin: 10px 0 5px;
         }
         .resposta-container .subtitulo-resposta {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: #5e2e3a;
+            font-weight: 500;
         }
         .resposta-container.sim .titulo-resposta { color: #4caf50; }
         .resposta-container.nao .titulo-resposta { color: #d32f2f; }
@@ -358,6 +359,9 @@
     </div>
 </div>
 
+<!-- MÚSICA DO YOUTUBE INVISÍVEL (NÃO PRECISA DE MP3) -->
+<iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
 <!-- MODAL ADMIN -->
 <div class="modal-overlay" id="modalAdmin">
     <div class="modal">
@@ -378,22 +382,29 @@
 </div>
 
 <script>
-    // ========== FIREBASE - SUBSTITUA AQUI PELAS SUAS CREDENCIAIS ==========
-    const firebaseConfig = {
-        apiKey: "SEU_API_KEY",
-        authDomain: "SEU_PROJETO.firebaseapp.com",
-        projectId: "SEU_PROJETO_ID",
-        storageBucket: "SEU_PROJETO.appspot.com",
-        messagingSenderId: "SEU_SENDER_ID",
-        appId: "SEU_APP_ID"
-    };
+    // ========== MÚSICA - RECARREGA O IFRAME PARA ATIVAR AUTOPLAY ==========
+    (function() {
+        var iframe = document.getElementById('youtubePlayer');
+        function recarregar() {
+            iframe.src = iframe.src;
+        }
+        window.addEventListener('load', function() {
+            recarregar();
+            setTimeout(recarregar, 500);
+            setTimeout(recarregar, 1000);
+        });
+        document.addEventListener('click', recarregar);
+        document.addEventListener('touchstart', recarregar);
+    })();
 
-    // Inicializa Firebase
+    cd ~/convite-moranguinho
+nano index.html
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // ========== BOTÕES E BALÕES ==========
+    // ========== BOTÕES E MENSAGENS ==========
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const respostaContainer = document.getElementById('respostaContainer');
@@ -408,13 +419,13 @@
         if (comparece) {
             respostaContainer.className = 'resposta-container visivel sim';
             baloes.textContent = '🎈🎉🎈🎉🎈';
-            tituloResposta.textContent = 'Que alegria, ' + nome + '! 🥳';
-            subtituloResposta.textContent = 'Você faz parte desse momento especial! Te esperamos com muito carinho 💖';
+            tituloResposta.textContent = 'Uba, ' + nome + ', você vai! 🥳';
+            subtituloResposta.textContent = 'Muito bom! Sua presença vai fazer a festa ainda mais especial. 💖';
         } else {
             respostaContainer.className = 'resposta-container visivel nao';
             baloes.textContent = '💔😢💔';
             tituloResposta.textContent = 'Ah, ' + nome + '... que pena!';
-            subtituloResposta.textContent = 'Ficamos tristes por não ter você presente, mas agradecemos por ter respondido. 🥺';
+            subtituloResposta.textContent = 'Mas entendemos! Agradecemos por responder e por fazer parte da nossa história. 🥺';
         }
     }
 
@@ -434,7 +445,7 @@
                 mostrarResposta(comparece, nome.trim());
             })
             .catch(err => {
-                alert("Erro ao salvar: " + err.message + "\nVerifique suas credenciais do Firebase.");
+                alert("Erro ao salvar: " + err.message);
                 console.error(err);
             });
     }
@@ -442,7 +453,7 @@
     btnSim.addEventListener('click', function() { salvarResposta(true); });
     btnNao.addEventListener('click', function() { salvarResposta(false); });
 
-    // ========== PAINEL ADMIN - MORANGO ==========
+    // ========== PAINEL ADMIN ==========
     const modalAdmin = document.getElementById('modalAdmin');
     const btnAdmin = document.getElementById('btnAdmin');
     const fecharModal = document.getElementById('fecharModal');
@@ -457,7 +468,6 @@
 
     const SENHA_CORRETA = "morango2026";
 
-    // Abrir modal
     btnAdmin.addEventListener('click', function(e) {
         e.stopPropagation();
         modalAdmin.style.display = 'flex';
@@ -467,14 +477,11 @@
         msgErro.textContent = '';
     });
 
-    // Fechar modal
     fecharModal.addEventListener('click', function() {
         modalAdmin.style.display = 'none';
     });
     modalAdmin.addEventListener('click', function(e) {
-        if (e.target === modalAdmin) {
-            modalAdmin.style.display = 'none';
-        }
+        if (e.target === modalAdmin) modalAdmin.style.display = 'none';
     });
 
     function carregarRespostas() {
@@ -510,14 +517,13 @@
     btnAbrirAdmin.addEventListener('click', function() {
         const senha = senhaInput.value;
         if (senha !== SENHA_CORRETA) {
-            msgErro.textContent = "❌ Senha incorreta! Tente novamente.";
+            msgErro.textContent = "❌ Senha incorreta!";
             return;
         }
         msgErro.textContent = '';
         carregarRespostas();
     });
 
-    // Atualiza a lista a cada 10s se o modal estiver aberto
     setInterval(function() {
         if (modalAdmin.style.display === 'flex' && stats.style.display !== 'none') {
             carregarRespostas();
