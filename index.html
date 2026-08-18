@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>🎀 1 Aninho - Moranguinho 🍓</title>
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
@@ -359,8 +360,8 @@
     </div>
 </div>
 
-<!-- MÚSICA DO YOUTUBE (INVISÍVEL) -->
-<iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<!-- PLAYER DE MÚSICA (INVISÍVEL) -->
+<iframe id="youtubePlayer" width="1" height="1" style="position:fixed; top:-9999px; left:-9999px;" src="https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=0&loop=1&playlist=Ez32I7jLzmM" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 <!-- MODAL ADMIN -->
 <div class="modal-overlay" id="modalAdmin">
@@ -382,63 +383,66 @@
 </div>
 
 <script>
-    // ========== MÚSICA - TOCA APÓS O PRIMEIRO CLIQUE ==========
-
+    // =============================================
+    // MÚSICA - TOCA APÓS O PRIMEIRO CLIQUE
+    // =============================================
     (function() {
-
-        var iframe = document.getElementById("youtubePlayer");
-
+        var iframe = document.getElementById('youtubePlayer');
         var tocando = false;
-
         function tocar() {
-
             if (!tocando) {
-
                 iframe.src = "https://www.youtube.com/embed/Ez32I7jLzmM?autoplay=1&loop=1&playlist=Ez32I7jLzmM";
-
                 tocando = true;
-
-                console.log("🎵 Música ativada!");
-
             }
-
         }
-
-        window.addEventListener("load", function() {
-
-            setTimeout(tocar, 500);
-
+        window.addEventListener('load', function() {
+            // Tenta tocar automaticamente (pode ser bloqueado)
+            setTimeout(tocar, 300);
         });
-
-        document.addEventListener("click", function() {
-
-            if (!tocando) tocar();
-
-        });
-
-        document.addEventListener("touchstart", function() {
-
-            if (!tocando) tocar();
-
-        });
-
+        // Se falhar, o primeiro clique ativa
+        document.addEventListener('click', tocar);
+        document.addEventListener('touchstart', tocar);
     })();
 
-    // ========== FIREBASE - COLOQUE SUAS CREDENCIAIS AQUI ==========
+    // =============================================
+    // FIREBASE - SUBSTITUA PELAS SUAS CREDENCIAIS
+    // =============================================
     const firebaseConfig = {
-        apiKey: "SEU_API_KEY",
-        authDomain: "SEU_PROJETO.firebaseapp.com",
-        projectId: "SEU_PROJETO_ID",
-        storageBucket: "SEU_PROJETO.appspot.com",
-        messagingSenderId: "SEU_SENDER_ID",
-        appId: "SEU_APP_ID"
+       // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyBKGMhlyW4PM_f1r9GGPYzfaSciVDK1Ess",
+  authDomain: "convite-moranguinho.firebaseapp.com",
+  projectId: "convite-moranguinho",
+  storageBucket: "convite-moranguinho.firebasestorage.app",
+  messagingSenderId: "851976490883",
+  appId: "1:851976490883:web:9e7319dfaa9a1c1b3ff0b6",
+  measurementId: "G-GD054MVS6Q"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
     };
 
-    firebase.initializeApp(firebaseConfig);
+    // Inicializa Firebase
+    try {
+        firebase.initializeApp(firebaseConfig);
+    } catch (e) {
+        console.error('Firebase init error:', e);
+    }
     const db = firebase.firestore();
     const respostasRef = db.collection("respostas");
 
-    // ========== BOTÕES E MENSAGENS ==========
+    // =============================================
+    // BOTÕES - VOU SIM / NÃO VOU
+    // =============================================
     const btnSim = document.getElementById('btnSim');
     const btnNao = document.getElementById('btnNao');
     const respostaContainer = document.getElementById('respostaContainer');
@@ -447,9 +451,13 @@
     const subtituloResposta = document.getElementById('subtituloResposta');
 
     function mostrarResposta(comparece, nome) {
+        // Esconde os botões
         btnSim.style.display = 'none';
         btnNao.style.display = 'none';
+
+        // Mostra a área de resposta
         respostaContainer.classList.add('visivel');
+
         if (comparece) {
             respostaContainer.className = 'resposta-container visivel sim';
             baloes.textContent = '🎈🎉🎈🎉🎈';
@@ -464,44 +472,11 @@
     }
 
     function salvarResposta(comparece) {
-
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
-
         if (!nome) {
-
             alert("Precisamos do seu nome para contar na lista!");
-
             return;
-
         }
-
-        const dados = {
-
-            nome: nome.trim(),
-
-            comparece: comparece,
-
-            data: new Date().toISOString()
-
-        };
-
-        respostasRef.add(dados)
-
-            .then(() => {
-
-                mostrarResposta(comparece, nome.trim());
-
-            })
-
-            .catch(err => {
-
-                alert("Erro ao salvar: " + err.message);
-
-                console.error(err);
-
-            });
-
-    }
         const dados = {
             nome: nome.trim(),
             comparece: comparece,
@@ -517,24 +492,32 @@
             });
     }
 
-    btnSim.addEventListener('click', function() { salvarResposta(true); });
-    btnNao.addEventListener('click', function() { salvarResposta(false); });
+    btnSim.addEventListener('click', function() {
+        salvarResposta(true);
+    });
 
-    // ========== PAINEL ADMIN ==========
-    const modalAdmin = document.getElementById('modalAdmin');
-    const btnAdmin = document.getElementById('btnAdmin');
-    const fecharModal = document.getElementById('fecharModal');
-    const senhaInput = document.getElementById('senhaAdmin');
-    const btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
-    const lista = document.getElementById('lista');
-    const stats = document.getElementById('stats');
-    const totalSpan = document.getElementById('total');
-    const confirmadosSpan = document.getElementById('confirmados');
-    const recusadosSpan = document.getElementById('recusados');
-    const msgErro = document.getElementById('mensagemErro');
+    btnNao.addEventListener('click', function() {
+        salvarResposta(false);
+    });
 
-    const SENHA_CORRETA = "morango2026";
+    // =============================================
+    // PAINEL ADMIN - MORANGO
+    // =============================================
+    var modalAdmin = document.getElementById('modalAdmin');
+    var btnAdmin = document.getElementById('btnAdmin');
+    var fecharModal = document.getElementById('fecharModal');
+    var senhaInput = document.getElementById('senhaAdmin');
+    var btnAbrirAdmin = document.getElementById('btnAbrirAdmin');
+    var lista = document.getElementById('lista');
+    var stats = document.getElementById('stats');
+    var totalSpan = document.getElementById('total');
+    var confirmadosSpan = document.getElementById('confirmados');
+    var recusadosSpan = document.getElementById('recusados');
+    var msgErro = document.getElementById('mensagemErro');
 
+    var SENHA_CORRETA = "morango2026";
+
+    // Abrir modal
     btnAdmin.addEventListener('click', function(e) {
         e.stopPropagation();
         modalAdmin.style.display = 'flex';
@@ -544,45 +527,49 @@
         msgErro.textContent = '';
     });
 
+    // Fechar modal
     fecharModal.addEventListener('click', function() {
         modalAdmin.style.display = 'none';
     });
     modalAdmin.addEventListener('click', function(e) {
-        if (e.target === modalAdmin) modalAdmin.style.display = 'none';
+        if (e.target === modalAdmin) {
+            modalAdmin.style.display = 'none';
+        }
     });
 
+    // Carregar respostas
     function carregarRespostas() {
         respostasRef.orderBy("data", "desc").get()
             .then((snapshot) => {
                 lista.innerHTML = '';
                 stats.style.display = 'flex';
-                let total = 0, confirmados = 0, recusados = 0;
+                var total = 0, confirmados = 0, recusados = 0;
                 if (snapshot.empty) {
                     lista.innerHTML = "<li style='justify-content:center;'>Ninguém respondeu ainda 😴</li>";
                 } else {
                     snapshot.forEach((doc) => {
-                        const data = doc.data();
+                        var data = doc.data();
                         total++;
                         if (data.comparece) confirmados++;
                         else recusados++;
-                        const li = document.createElement('li');
-                        const status = data.comparece ? "✅ Vai" : "❌ Não vai";
-                        const dataFormatada = data.data ? new Date(data.data).toLocaleString('pt-BR') : '';
-                        li.innerHTML = `<span>${data.nome}</span><span class="badge">${status}</span><small>${dataFormatada}</small>`;
+                        var li = document.createElement('li');
+                        var status = data.comparece ? "✅ Vai" : "❌ Não vai";
+                        var dataFormatada = data.data ? new Date(data.data).toLocaleString('pt-BR') : '';
+                        li.innerHTML = '<span>' + data.nome + '</span><span class="badge">' + status + '</span><small>' + dataFormatada + '</small>';
                         lista.appendChild(li);
                     });
                 }
-                totalSpan.textContent = `Total: ${total}`;
-                confirmadosSpan.textContent = `✅ ${confirmados}`;
-                recusadosSpan.textContent = `❌ ${recusados}`;
+                totalSpan.textContent = 'Total: ' + total;
+                confirmadosSpan.textContent = '✅ ' + confirmados;
+                recusadosSpan.textContent = '❌ ' + recusados;
             })
-            .catch(err => {
-                lista.innerHTML = `<li>Erro ao carregar: ${err.message}</li>`;
+            .catch(function(err) {
+                lista.innerHTML = '<li>Erro ao carregar: ' + err.message + '</li>';
             });
     }
 
     btnAbrirAdmin.addEventListener('click', function() {
-        const senha = senhaInput.value;
+        var senha = senhaInput.value;
         if (senha !== SENHA_CORRETA) {
             msgErro.textContent = "❌ Senha incorreta!";
             return;
@@ -591,6 +578,7 @@
         carregarRespostas();
     });
 
+    // Atualização automática (a cada 10 segundos)
     setInterval(function() {
         if (modalAdmin.style.display === 'flex' && stats.style.display !== 'none') {
             carregarRespostas();
