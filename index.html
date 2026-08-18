@@ -472,11 +472,44 @@ const analytics = getAnalytics(app);
     }
 
     function salvarResposta(comparece) {
+
         const nome = prompt("Qual o seu nome? (pra mamãe saber quem respondeu 💕)");
+
         if (!nome) {
+
             alert("Precisamos do seu nome para contar na lista!");
+
             return;
+
         }
+
+        const dados = {
+
+            nome: nome.trim(),
+
+            comparece: comparece,
+
+            data: new Date().toISOString()
+
+        };
+
+        respostasRef.add(dados)
+
+            .then(() => {
+
+                mostrarResposta(comparece, nome.trim());
+
+            })
+
+            .catch(err => {
+
+                alert("Erro ao salvar: " + err.message);
+
+                console.error(err);
+
+            });
+
+    }
         const dados = {
             nome: nome.trim(),
             comparece: comparece,
